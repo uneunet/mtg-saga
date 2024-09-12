@@ -1,1 +1,1 @@
-# mtg-saga
+# MTG Saga
