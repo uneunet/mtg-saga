@@ -1,18 +1,16 @@
 mod types;
+mod auth;
+mod routes;
 
-use axum::{
-    Router,
-    routing::get,
-};
 use mongodb::{
     Client,
-    Database,
     Collection,
 };
 use std::env;
-use crate::{
-    types::*,
-};
+use crate::types::*;
+use crate::routes::router;
+
+use jwt_simple::prelude::*;
 
 #[tokio::main]
 async fn main() {
@@ -24,14 +22,9 @@ async fn main() {
     let database = client.database("db");
     let collection: Collection<User> = database.collection("users");
 
-    let router = Router::new()
-        .route("/", get(root_handler))
-        .with_state(collection);
+    let router = router(collection);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, router).await.unwrap();
 }
 
-async fn root_handler() -> &'static str {
-    "Hello!"
-}
