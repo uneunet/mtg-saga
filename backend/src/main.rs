@@ -1,14 +1,12 @@
-mod types;
 mod auth;
 mod routes;
+mod types;
+mod users;
 
-use mongodb::{
-    Client,
-    Collection,
-};
-use std::env;
-use crate::types::*;
 use crate::routes::router;
+use crate::types::*;
+use mongodb::{Client, Collection};
+use std::env;
 
 use jwt_simple::prelude::*;
 
@@ -27,4 +25,3 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, router).await.unwrap();
 }
-

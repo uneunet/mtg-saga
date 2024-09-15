@@ -1,8 +1,6 @@
-use serde::{Serialize, Deserialize};
 use mongodb::bson::oid::ObjectId;
+use serde::{Deserialize, Serialize};
 use ts_rs::TS;
-
-#[ts(export_to = "../bindings")]
 
 #[derive(Clone, Debug, Serialize, Deserialize, TS)]
 #[ts(export)]
