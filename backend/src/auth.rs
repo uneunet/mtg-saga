@@ -11,6 +11,7 @@ use axum_extra::{
     headers::{authorization::Bearer, Authorization},
     TypedHeader,
 };
+use bcrypt::{DEFAULT_COST, hash, verify};
 use jwt_simple::prelude::*;
 use mongodb::{
     bson::{doc, oid::ObjectId},
@@ -39,7 +40,7 @@ pub async fn sign_up(
     let user = User {
         id: None,
         email: user.email,
-        password: user.password,
+        password: hash(user.password, DEFAULT_COST).unwrap(),
     };
     collection.insert_one(user).await.unwrap();
 
@@ -59,7 +60,7 @@ pub async fn login(
         .await
         .unwrap()
     {
-        if user.password == credentials.password {
+        if verify(credentials.password, &user.password).unwrap() {
             let secret = env::var("KEY_SECRET").expect("KEY_SECRET not found");
             let key = HS256Key::from_bytes(secret.as_bytes());
             let claims = Claims::create(Duration::from_mins(30)).with_subject(user.email);

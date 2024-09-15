@@ -1,5 +1,5 @@
 <script>
-  import { redirect } from "@sveltejs/kit";
+  import { goto } from "$app/navigation";
 
 	let email = '';
 	let password = '';
@@ -18,7 +18,7 @@
 
 		if (res.ok) {
 			alert("Signup Complete! Login to start your saga.");
-			redirect(302, "/login");
+			goto('/login');
 		}
 	}
 </script>
