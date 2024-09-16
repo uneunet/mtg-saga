@@ -1,7 +1,7 @@
 use crate::{auth, types::*, users};
 use axum::{
     middleware::from_fn,
-    routing::{get, post},
+    routing::{get, post, put, delete},
     Router,
 };
 use mongodb::Collection;
@@ -22,6 +22,8 @@ fn auth_router() -> Router<Collection<User>> {
 
 fn user_router() -> Router<Collection<User>> {
     Router::new()
+        .route("/:name", get(users::get_user_info_with_name))
         .route("/", get(users::get_user_info))
+        .route("/delete", delete(users::delete_user))
         .layer(from_fn(auth::auth_middleware))
 }

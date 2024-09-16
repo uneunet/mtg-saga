@@ -12,6 +12,10 @@ use jwt_simple::prelude::*;
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::DEBUG)
+        .init(); 
+
     dotenvy::dotenv().expect(".env file not found");
 
     let mongodb_uri = env::var("MONGODB_URI").expect("MONGODB_URI not found");

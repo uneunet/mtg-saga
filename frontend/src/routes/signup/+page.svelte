@@ -1,6 +1,7 @@
 <script>
   import { goto } from "$app/navigation";
 
+	let name = '';
 	let email = '';
 	let password = '';
 	
@@ -11,6 +12,7 @@
     		"Content-Type": "application/json"
  			},
 			body: JSON.stringify({
+				"name": name,
 				"email": email,
 				"password": password,
 			})
@@ -23,6 +25,7 @@
 	}
 </script>
 
+<input bind:value={name} type="text" placeholder="Name" class="input w-full max-w-xs" />
 <input bind:value={email} type="text" placeholder="Email" class="input w-full max-w-xs" />
 <input bind:value={password} type="password" placeholder="Password" class="input w-full max-w-xs" />
 

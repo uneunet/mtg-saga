@@ -22,11 +22,12 @@ use std::env;
 
 pub async fn sign_up(
     State(collection): State<Collection<User>>,
-    Json(user): Json<Credentials>,
+    Json(user): Json<User>,
 ) -> impl IntoResponse {
-    if user.email.is_empty() || user.password.is_empty() {
+    if user.name.is_empty() || user.email.is_empty() || user.password.is_empty() {
         return StatusCode::PRECONDITION_FAILED.into_response();
     }
+    println!("{:?}", user);
 
     if collection
         .find_one(doc! {"email": user.email.as_str()})
@@ -39,6 +40,7 @@ pub async fn sign_up(
 
     let user = User {
         id: None,
+        name: user.name,
         email: user.email,
         password: hash(user.password, DEFAULT_COST).unwrap(),
     };
