@@ -19,8 +19,6 @@
 		})
 
 		if (res.ok) {
-			const token = await res.text();
-			localStorage.setItem("jwt", token);
 			goto('/profile');
 		} else {
 			loginFailed = true;

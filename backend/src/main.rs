@@ -22,9 +22,9 @@ async fn main() {
     let client = Client::with_uri_str(mongodb_uri).await.unwrap();
 
     let database = client.database("db");
-    let collection: Collection<User> = database.collection("users");
+    let users: Collection<User> = database.collection("users");
 
-    let router = router(collection);
+    let router = router(users);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, router).await.unwrap();

@@ -8,10 +8,10 @@ use mongodb::{bson::doc, Collection};
 use serde::{Deserialize, Serialize};
 
 pub async fn get_user_info(
-    State(collection): State<Collection<User>>,
+    State(users): State<Collection<User>>,
     Extension(email): Extension<String>,
 ) -> axum::response::Result<response::Json<User>> {
-    let user = collection
+    let user = users
         .find_one(doc! { "email": email })
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
@@ -21,17 +21,17 @@ pub async fn get_user_info(
 }
 
 pub async fn get_user_info_with_name(
-    State(collection): State<Collection<User>>,
+    State(users): State<Collection<User>>,
     Path(name): Path<String>
 ) -> axum::response::Result<response::Json<User>> {
-    let email = collection
+    let email = users
         .find_one(doc! { "name": name })
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .unwrap()
         .email;
 
-    let user = collection
+    let user = users
         .find_one(doc! { "email": email })
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
@@ -41,10 +41,10 @@ pub async fn get_user_info_with_name(
 }
 
 pub async fn delete_user(
-    State(collection): State<Collection<User>>,
+    State(users): State<Collection<User>>,
     Extension(email): Extension<String>,
 ) -> axum::response::Result<response::Response> {
-    collection.delete_one(doc! { "email": email })
+    users.delete_one(doc! { "email": email })
     .await
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

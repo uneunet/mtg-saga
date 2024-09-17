@@ -4,12 +4,17 @@ use axum::{
     routing::{get, post, put, delete},
     Router,
 };
+use axum_extra::{
+    TypedHeader,
+    headers::authorization::{Authorization, Bearer},
+    extract::cookie::{CookieJar, Cookie},
+};
 use mongodb::Collection;
 
-pub fn router(collection: Collection<User>) -> Router {
+pub fn router(users: Collection<User>) -> Router {
     let api_router = Router::new()
-        .nest("/auth", auth_router().with_state(collection.clone()))
-        .nest("/user", user_router().with_state(collection));
+        .nest("/auth", auth_router().with_state(users.clone()))
+        .nest("/user", user_router().with_state(users));
 
     Router::new().nest("/api", api_router)
 }
