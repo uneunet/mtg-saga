@@ -47,10 +47,9 @@ pub async fn sign_up(
 }
 
 pub async fn login(
-    jar: CookieJar,
     State(users): State<Collection<User>>,
     Json(credentials): Json<Credentials>,
-) -> axum::response::Result<CookieJar, StatusCode> {
+) -> axum::response::Result<Response, StatusCode> {
     if credentials.email.is_empty() || credentials.password.is_empty() {
         return Err(StatusCode::PRECONDITION_FAILED);
     }
@@ -66,13 +65,7 @@ pub async fn login(
             let claims = Claims::create(Duration::from_mins(30)).with_subject(user.email);
             let token = key.authenticate(claims).unwrap();
 
-            let cookie = Cookie::build(("jwt", token))
-                .path("/api")
-                .same_site(cookie::SameSite::None) 
-                .http_only(true)
-                .secure(true);
-
-            Ok(jar.add(cookie))
+            Ok(token.into_response())
         } else {
             Err(StatusCode::UNAUTHORIZED)
         }

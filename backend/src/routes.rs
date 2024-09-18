@@ -16,7 +16,8 @@ pub fn router(users: Collection<User>) -> Router {
         .nest("/auth", auth_router().with_state(users.clone()))
         .nest("/user", user_router().with_state(users));
 
-    Router::new().nest("/api", api_router)
+    Router::new()
+        .nest("/api", api_router)
 }
 
 fn auth_router() -> Router<Collection<User>> {
