@@ -3,18 +3,13 @@ use axum::{
     extract::Request,
     extract::{Json, State},
     http::StatusCode,
-    middleware::{self, Next},
+    middleware::Next,
     response::{IntoResponse, Response},
 };
-use axum_extra::{
-    extract::cookie::{Cookie, CookieJar}
-};
-use bcrypt::{DEFAULT_COST, hash, verify};
+use axum_extra::extract::cookie::{Cookie, CookieJar};
+use bcrypt::{hash, verify, DEFAULT_COST};
 use jwt_simple::prelude::*;
-use mongodb::{
-    bson::doc,
-    Collection,
-};
+use mongodb::{bson::doc, Collection};
 use std::env;
 
 pub async fn sign_up(
@@ -22,7 +17,7 @@ pub async fn sign_up(
     Json(user): Json<User>,
 ) -> axum::response::Result<Response, StatusCode> {
     if user.name.is_empty() || user.email.is_empty() || user.password.is_empty() {
-        return Err(StatusCode::PRECONDITION_FAILED)
+        return Err(StatusCode::PRECONDITION_FAILED);
     }
     println!("{:?}", user);
 
@@ -32,7 +27,7 @@ pub async fn sign_up(
         .unwrap()
         .is_some()
     {
-        return Err(StatusCode::CONFLICT)
+        return Err(StatusCode::CONFLICT);
     }
 
     let user = User {
@@ -74,7 +69,11 @@ pub async fn login(
     }
 }
 
-pub async fn auth_middleware(jar: CookieJar, mut request: Request, next: Next) -> axum::response::Result<Response, StatusCode> {
+pub async fn auth_middleware(
+    jar: CookieJar,
+    mut request: Request,
+    next: Next,
+) -> axum::response::Result<Response, StatusCode> {
     if let Some(token) = jar.get("jwt") {
         let secret = env::var("KEY_SECRET").expect("KEY_SECRET not found");
         let key = HS256Key::from_bytes(secret.as_bytes());

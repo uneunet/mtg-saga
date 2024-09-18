@@ -1,13 +1,13 @@
 use crate::{auth, types::*, users};
 use axum::{
     middleware::from_fn,
-    routing::{get, post, put, delete},
+    routing::{delete, get, post, put},
     Router,
 };
 use axum_extra::{
-    TypedHeader,
+    extract::cookie::{Cookie, CookieJar},
     headers::authorization::{Authorization, Bearer},
-    extract::cookie::{CookieJar, Cookie},
+    TypedHeader,
 };
 use mongodb::Collection;
 
@@ -16,8 +16,7 @@ pub fn router(users: Collection<User>) -> Router {
         .nest("/auth", auth_router().with_state(users.clone()))
         .nest("/user", user_router().with_state(users));
 
-    Router::new()
-        .nest("/api", api_router)
+    Router::new().nest("/api", api_router)
 }
 
 fn auth_router() -> Router<Collection<User>> {

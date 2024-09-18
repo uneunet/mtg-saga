@@ -8,13 +8,11 @@ use crate::types::*;
 use mongodb::{Client, Collection};
 use std::env;
 
-use jwt_simple::prelude::*;
-
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::DEBUG)
-        .init(); 
+        .init();
 
     dotenvy::dotenv().expect(".env file not found");
 
