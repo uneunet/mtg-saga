@@ -16,11 +16,12 @@ export const actions = {
 				"password": password,
 			})
 		})
-	
+		console.log(res)
+
 		if (res.ok) {
 			const token = await res.text();
 
-			cookies.set('jwt', token, {
+			cookies.set('token', token, {
 				path: '/',
 				httpOnly: true,
 				secure: true,

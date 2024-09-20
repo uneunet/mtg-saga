@@ -4,48 +4,47 @@ use axum::{
     http::StatusCode,
     response::{self, IntoResponse, Response},
 };
-use mongodb::{bson::doc, Collection};
+use mongodb::{bson::{oid::ObjectId, doc}, Collection};
 use serde::{Deserialize, Serialize};
 
 pub async fn get_user_info(
-    State(users): State<Collection<User>>,
-    Extension(email): Extension<String>,
-) -> axum::response::Result<response::Json<User>> {
+    State(states): State<DBStates>,
+    Extension(user): Extension<ObjectId>,
+) -> axum::response::Result<response::Json<UserInfo>> {
+    let users = states.users;
+
     let user = users
-        .find_one(doc! { "email": email })
+        .find_one(doc! { "_id": user })
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .unwrap();
 
-    Ok(response::Json(user))
+    Ok(response::Json(user.info))
 }
 
 pub async fn get_user_info_with_name(
-    State(users): State<Collection<User>>,
-    Path(name): Path<String>,
-) -> axum::response::Result<response::Json<User>> {
-    let email = users
-        .find_one(doc! { "name": name })
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .unwrap()
-        .email;
+    State(states): State<DBStates>,
+    Path(email): Path<String>,
+) -> axum::response::Result<response::Json<UserInfo>> {
+    let users = states.users;
 
     let user = users
-        .find_one(doc! { "email": email })
+        .find_one(doc! { "info.email": email })
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .unwrap();
 
-    Ok(response::Json(user))
+    Ok(response::Json(user.info))
 }
 
 pub async fn delete_user(
-    State(users): State<Collection<User>>,
+    State(states): State<DBStates>,
     Extension(email): Extension<String>,
 ) -> axum::response::Result<response::Response> {
+    let users = states.users;
+
     users
-        .delete_one(doc! { "email": email })
+        .delete_one(doc! { "info.email": email })
         .await
         .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 

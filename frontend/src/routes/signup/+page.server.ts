@@ -5,7 +5,7 @@ export const actions = {
 		const data = await request.formData();
 		const name = data.get('name');
 		const email = data.get('email');
-		const password = data.password("password");
+		const password = data.get("password");
 
 		const res = await fetch('http://localhost:3000/api/auth/signup', {
 			method: 'POST',

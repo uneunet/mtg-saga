@@ -8,18 +8,23 @@ use axum::{
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use bcrypt::{hash, verify, DEFAULT_COST};
-use jwt_simple::prelude::*;
-use mongodb::{bson::doc, Collection};
-use std::env;
+use mongodb::bson::{
+    DateTime,
+    doc,
+};
+use rand::prelude::*;
+use rand_chacha::ChaCha20Rng;
+use validator::Validate;
 
 pub async fn sign_up(
-    State(users): State<Collection<User>>,
-    Json(user): Json<User>,
+    State(states): State<DBStates>,
+    Json(user): Json<FormUser>,
 ) -> axum::response::Result<Response, StatusCode> {
-    if user.name.is_empty() || user.email.is_empty() || user.password.is_empty() {
+    let users = states.users;
+
+    if user.validate().is_err() {
         return Err(StatusCode::PRECONDITION_FAILED);
     }
-    println!("{:?}", user);
 
     if users
         .find_one(doc! {"email": user.email.as_str()})
@@ -30,11 +35,15 @@ pub async fn sign_up(
         return Err(StatusCode::CONFLICT);
     }
 
-    let user = User {
-        id: None,
+    let user_info = UserInfo {
         name: user.name,
         email: user.email,
-        password: hash(user.password, DEFAULT_COST).unwrap(),
+    };
+
+    let user = User {
+        id: None,
+        info: user_info,
+        password_hash: hash(user.password, DEFAULT_COST).unwrap(),
     };
     users.insert_one(user).await.unwrap();
 
@@ -42,25 +51,39 @@ pub async fn sign_up(
 }
 
 pub async fn login(
-    State(users): State<Collection<User>>,
-    Json(credentials): Json<Credentials>,
+    State(states): State<DBStates>,
+    Json(credential): Json<Credential>,
 ) -> axum::response::Result<Response, StatusCode> {
-    if credentials.email.is_empty() || credentials.password.is_empty() {
+    let users = states.users;
+    let sessions = states.sessions;
+
+    if credential.validate().is_err() {
         return Err(StatusCode::PRECONDITION_FAILED);
     }
 
     if let Some(user) = users
-        .find_one(doc! {"email": credentials.email.as_str()})
+        .find_one(doc! {"info.email": credential.email.as_str()})
         .await
         .unwrap()
     {
-        if verify(credentials.password, &user.password).unwrap() {
-            let secret = env::var("KEY_SECRET").expect("KEY_SECRET not found");
-            let key = HS256Key::from_bytes(secret.as_bytes());
-            let claims = Claims::create(Duration::from_mins(30)).with_subject(user.email);
-            let token = key.authenticate(claims).unwrap();
+        if verify(credential.password, &user.password_hash).unwrap() {
+            let mut rng = ChaCha20Rng::from_entropy();
+            let mut token = [0u8; 16];
+            rng.fill_bytes(&mut token);
+            let token_str = token.iter().map(|s| format!("{:02X}", s)).collect::<String>();
 
-            Ok(token.into_response())
+            let session = Session {
+                id: None,
+                user: user.id.unwrap(),
+                token: token_str.clone(),
+                created_at: DateTime::now(),
+            };
+            sessions
+                .insert_one(session)
+                .await
+                .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+            Ok(token_str.into_response())
         } else {
             Err(StatusCode::UNAUTHORIZED)
         }
@@ -70,20 +93,22 @@ pub async fn login(
 }
 
 pub async fn auth_middleware(
+    State(states): State<DBStates>,
     jar: CookieJar,
     mut request: Request,
     next: Next,
 ) -> axum::response::Result<Response, StatusCode> {
-    if let Some(token) = jar.get("jwt") {
-        let secret = env::var("KEY_SECRET").expect("KEY_SECRET not found");
-        let key = HS256Key::from_bytes(secret.as_bytes());
-        let email = key
-            .verify_token::<NoCustomClaims>(token.value(), None)
-            .map_err(|_| StatusCode::UNAUTHORIZED)?
-            .subject
-            .unwrap();
+    let sessions = states.sessions;
 
-        request.extensions_mut().insert(email);
+    if let Some(token) = jar.get("token") {
+        let user = sessions
+            .find_one(doc! { "token": token.value() })
+            .await
+            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
+            .unwrap()
+            .user;
+
+        request.extensions_mut().insert(user);
         Ok(next.run(request).await)
     } else {
         Err(StatusCode::UNAUTHORIZED)

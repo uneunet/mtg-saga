@@ -4,16 +4,19 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = "0.7.5"
-axum-extra = { version = "0.9.3", features = ["cookie", "typed-header"] }
-bcrypt = "0.15.1"
+axum = { version = "0.7.5", features = ["http1", "json", "tokio"], default-features = false }
+axum-extra = { version = "0.9.3", features = ["cookie", "typed-header"], default-features = false }
+bcrypt = { version = "0.15.1", features = ["std"], default-features = false }
 cookie = "0.18.1"
 dotenvy = "0.15.7"
-futures = "0.3.30"
+futures = { version = "0.3.30", default-features = false }
 jwt-simple = "0.12.10"
-mongodb = "3.1.0"
-serde = "1.0.210"
+mongodb = { version = "3.1.0", features = ["compat-3-0-0", "rustls-tls"], default-features = false }
+rand = "0.8.5"
+rand_chacha = "0.3.1"
+serde = { version = "1.0.210", default-features = false }
 serde_json = "1.0.128"
-tokio = { version = "1.40.0", features = ["full"] }
-tracing = "0.1.40"
-tracing-subscriber = "0.3.18"
+tokio = { version = "1.40.0", features = ["rt-multi-thread"] }
+tracing = { version = "0.1.40", default-features = false }
+tracing-subscriber = { version = "0.3.18", features = ["fmt"], default-features = false }
+validator = { version = "0.18.1", features = ["derive"] }
