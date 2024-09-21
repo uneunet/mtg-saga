@@ -1,0 +1,12 @@
+[package]
+name = "infrastructure"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+domain = { path = "../domain" }
+chrono = { workspace = true, features = ["serde"] }
+mongodb = "3.1.0"
+serde.workspace = true
+async-trait = "0.1.82"
+anyhow.workspace = true
