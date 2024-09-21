@@ -23,7 +23,7 @@ impl DBUserRepository {
 #[async_trait]
 impl UserRepository for DBUserRepository {
     async fn create(&self, user: User) -> Result<()> {
-        let _ = self.database.insert_one(user).await?;
+        self.database.insert_one(user).await?;
         Ok(())
     }
 
@@ -35,12 +35,12 @@ impl UserRepository for DBUserRepository {
 
     async fn update_info(&self, user_id: String, info: UserInfo) -> Result<(), anyhow::Error> {
         let update = doc! { "$set": { "info": to_bson(&info).unwrap() } };
-        let _ = self.database.update_one(doc! { "user_id": user_id }, update).await?;
+        self.database.update_one(doc! { "user_id": user_id }, update).await?;
         Ok(())
     }
 
     async fn delete(&self, user_id: String) -> Result<()> {
-        let _ = self.database.delete_one(doc! {"user_id": user_id}).await?;
+        self.database.delete_one(doc! {"user_id": user_id}).await?;
         Ok(())
     }
 }
