@@ -3,14 +3,18 @@ use domain::{
     model::user::{User, UserInfo},
     repository::user_repository::UserRepository,
 };
+use infrastructure::repository::user::DBUserRepositoryImpl;
 
 pub struct UserService {
-    repository: Box<dyn UserRepository>,
+    repository: Box<dyn UserRepository + Send + Sync>,
 }
 
 impl UserService {
-    pub fn new(repository: Box<dyn UserRepository>) -> Self {
-        Self { repository }
+    pub async fn new() -> Result<Self> {
+        let repository = DBUserRepositoryImpl::new().await?;
+        Ok(Self {
+            repository: Box::new(repository),
+        })
     }
 
     pub async fn create(&self, user: User) -> Result<()> {
