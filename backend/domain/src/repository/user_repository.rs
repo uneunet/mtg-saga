@@ -1,6 +1,6 @@
 use crate::model::user::{User, UserInfo};
-use async_trait::async_trait;
 use anyhow::Result;
+use async_trait::async_trait;
 
 #[async_trait]
 pub trait UserRepository {

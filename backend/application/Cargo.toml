@@ -4,3 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+usecase = { path = "../usecase" }
+axum = "0.7.6"
+tokio = "1.40.0"

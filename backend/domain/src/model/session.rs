@@ -1,7 +1,7 @@
-use chrono::{Utc, DateTime};
-use serde::{Serialize, Deserialize};
+use chrono::{DateTime, Utc};
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Session {
@@ -27,4 +27,3 @@ impl Session {
         }
     }
 }
-
