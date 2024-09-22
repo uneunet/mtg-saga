@@ -64,6 +64,7 @@ checksum = "86fdf8605db99b54d3cd748a44c6d04df638eb5dafb219b135d0149bd0db01f6"
 name = "application"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "axum",
  "tokio",
  "usecase",
@@ -400,8 +401,6 @@ dependencies = [
  "anyhow",
  "async-trait",
  "chrono",
- "rand",
- "rand_chacha",
  "serde",
  "validator",
 ]
@@ -1832,6 +1831,8 @@ dependencies = [
  "async-trait",
  "domain",
  "infrastructure",
+ "rand",
+ "rand_chacha",
 ]
 
 [[package]]

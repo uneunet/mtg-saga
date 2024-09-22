@@ -1,15 +1,25 @@
 use anyhow::Result;
 use async_trait::async_trait;
 use domain::{model::session::Session, repository::session_repository::SessionRepository};
-use mongodb::{bson::doc, Collection};
+use mongodb::{bson::doc, Client, Collection};
+
+use std::env;
 
 pub struct DBSessionRepositoryImpl {
     database: Collection<Session>,
 }
 
 impl DBSessionRepositoryImpl {
-    pub fn new(database: Collection<Session>) -> Self {
-        Self { database }
+    pub async fn new() -> Result<Self> {
+        let database_uri = env::var("MONGODB_URI").expect("MONGODB_URI not found");
+        let collection: Collection<Session> = Client::with_uri_str(database_uri)
+            .await?
+            .database("db")
+            .collection("sessions");
+
+        Ok(Self {
+            database: collection,
+        })
     }
 }
 

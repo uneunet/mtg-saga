@@ -1,16 +1,14 @@
 mod routes;
 
-
-use axum::{
-    Router,
-    routing::get,
-};
+use anyhow::Result;
+use axum::{routing::get, Router};
 
 #[tokio::main]
-async fn main() {
-    let routes = Router::new()
-        .route("/", get(|_| "hello!"));
+async fn main() -> Result<()> {
+    let routes = Router::new().route("/", get(|| async { "hello!"}));
 
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000");
-    axum::serve(listener, routes).await.unwrap();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
+    axum::serve(listener, routes).await?;
+
+    Ok(())
 }

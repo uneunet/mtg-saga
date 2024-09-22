@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -5,6 +6,7 @@ use validator::Validate;
 pub struct User {
     pub info: UserInfo,
     pub password_hash: String,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Validate)]
@@ -22,6 +24,7 @@ impl User {
         Self {
             info,
             password_hash,
+            created_at: Utc::now(),
         }
     }
 }

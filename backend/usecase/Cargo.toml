@@ -6,5 +6,7 @@ edition = "2021"
 [dependencies]
 anyhow.workspace = true
 async-trait.workspace = true
+rand = "0.8.5"
+rand_chacha = "0.3.1"
 domain = { path = "../domain" }
 infrastructure = { path = "../infrastructure" }

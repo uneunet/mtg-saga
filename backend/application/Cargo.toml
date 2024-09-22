@@ -5,5 +5,6 @@ edition = "2021"
 
 [dependencies]
 usecase = { path = "../usecase" }
+anyhow.workspace = true
 axum = "0.7.6"
 tokio = "1.40.0"

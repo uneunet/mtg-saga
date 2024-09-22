@@ -6,17 +6,25 @@ use domain::{
 };
 use mongodb::{
     bson::{doc, to_bson},
-    Collection,
+    Client, Collection,
 };
-use serde::{Deserialize, Serialize};
+use std::env;
 
 pub struct DBUserRepositoryImpl {
     database: Collection<User>,
 }
 
 impl DBUserRepositoryImpl {
-    pub fn new(database: Collection<User>) -> Self {
-        Self { database }
+    pub async fn new() -> Result<Self> {
+        let database_uri = env::var("MONGODB_URI").expect("MONGODB_URI not found");
+        let collection: Collection<User> = Client::with_uri_str(database_uri)
+            .await?
+            .database("db")
+            .collection("user");
+
+        Ok(Self {
+            database: collection,
+        })
     }
 }
 
