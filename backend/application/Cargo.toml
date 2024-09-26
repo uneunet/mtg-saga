@@ -7,5 +7,8 @@ edition = "2021"
 usecase = { path = "../usecase" }
 anyhow.workspace = true
 axum = "0.7.6"
+axum-macros = { version = "0.4.2", features = ["default"] }
+axum-extra = { version = "0.9.4", features = ["cookie"] }
 dotenvy = "0.15.7"
 tokio = "1.40.0"
+serde = { version = "1.0.210", features = ["derive"] }

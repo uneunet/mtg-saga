@@ -1,32 +1,35 @@
 use anyhow::Result;
 use domain::{model::session::Session, repository::session_repository::SessionRepository};
 use infrastructure::repository::session::DBSessionRepositoryImpl;
-use rand::prelude::*;
-use rand_chacha::ChaCha20Rng;
+use std::sync::Arc;
 
-pub struct SessionService {
-    repository: Box<dyn SessionRepository + Send + Sync>,
+#[derive(Clone)]
+pub struct SessionUseCase {
+    repository: Arc<dyn SessionRepository + Send + Sync>,
 }
 
-impl SessionService {
+impl SessionUseCase {
     pub async fn new() -> Result<Self> {
         let repository = DBSessionRepositoryImpl::new().await?;
-        Ok(Self { repository: Box::new(repository) })
+        Ok(Self {
+            repository: Arc::new(repository),
+        })
     }
 
+    pub async fn create(&self, user_id: String) -> Result<Session> {
+        let session = Session::new(user_id);
+        self.repository.create(session.clone()).await?;
+        Ok(session)
+    }
+
+    pub async fn find_by_token(&self, token: String) -> Result<Option<Session>> {
+        self.repository.find_by_token(token).await
+    }
     pub async fn find_by_id(&self, user_id: String) -> Result<Option<Session>> {
         self.repository.find_by_id(user_id).await
     }
 
-    pub async fn create(&self, user_id: String) -> Result<()> {
-        let mut rng = ChaCha20Rng::from_seed(Default::default());
-        let mut token = [0u8; 16];
-        rng.fill_bytes(&mut token);
-        let token = token
-            .iter()
-            .map(|s| format!("{:02X}", s))
-            .collect::<String>();
-
-        self.repository.create(Session::new(user_id, token)).await
+    pub async fn delete(&self, user_id: String) -> Result<()> {
+        self.repository.delete(user_id).await
     }
 }
